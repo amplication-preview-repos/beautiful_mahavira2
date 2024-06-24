@@ -1,0 +1,74 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  compStatuses    CompStatus[] @relation(fields: [compStatusesIds], references: [id])
+  compStatusesIds String[]     @db.ObjectId
+  createdAt       DateTime     @default(now())
+  email           String       @unique
+  id              String       @id @default(auto()) @map("_id") @db.ObjectId
+  Name            String
+  password        String
+  phoneNumber     String?
+  roles           String?
+  updatedAt       DateTime     @updatedAt
+  username        String       @unique
+}
+
+model Company {
+  createdAt       DateTime     @default(now())
+  fields          FieldModel[]
+  id              String       @id @default(auto()) @map("_id") @db.ObjectId
+  name            String       @unique
+  totalFields     Int
+  updatedAt       DateTime     @updatedAt
+  userStatuses    UserStatus[] @relation(fields: [userStatusesIds], references: [id])
+  userStatusesIds String[]     @db.ObjectId
+}
+
+model CompStatus {
+  createdAt DateTime             @default(now())
+  id        String               @id @default(auto()) @map("_id") @db.ObjectId
+  status    EnumCompStatusStatus
+  updatedAt DateTime             @updatedAt
+  user      User[]               @relation(fields: [userIds], references: [id])
+  userIds   String[]             @db.ObjectId
+}
+
+model UserStatus {
+  company    Company[]             @relation(fields: [companyIds], references: [id])
+  companyIds String[]              @db.ObjectId
+  createdAt  DateTime              @default(now())
+  id         String                @id @default(auto()) @map("_id") @db.ObjectId
+  status     EnumUserStatusStatus?
+  updatedAt  DateTime              @updatedAt
+}
+
+model FieldModel {
+  address   String
+  company   Company  @relation(fields: [companyId], references: [id])
+  companyId String   @db.ObjectId
+  createdAt DateTime @default(now())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  password  String
+  updatedAt DateTime @updatedAt
+}
+
+enum EnumCompStatusStatus {
+  Completed
+  Pending
+  Denied
+}
+
+enum EnumUserStatusStatus {
+  Completed
+  Pending
+  Denied
+}
